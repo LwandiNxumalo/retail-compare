@@ -1,0 +1,7 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="RetailCompare.API/RetailCompare.API.csproj" />
+    <Project Path="RetailCompare.App/RetailCompare.App.csproj" />
+    <Project Path="RetailCompare.Shared/RetailCompare.Shared.csproj" />
+  </Folder>
+</Solution>
