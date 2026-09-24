@@ -3,9 +3,9 @@ using RetailCompare.API.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Register DbContext with PostgreSQL
+// Register DbContext with Sqlite
 builder.Services.AddDbContext<RetailCompareDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
