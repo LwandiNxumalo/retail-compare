@@ -41,4 +41,25 @@ public class ApiService
             return new List<ProductDto>();
         }
     }
+
+    public async Task<bool> AddToWatchlistAsync(string userId, int productId, decimal targetPrice)
+    {
+        try
+        {
+            var request = new WatchlistRequest
+            {
+                UserId = userId,
+                ProductId = productId,
+                TargetPrice = targetPrice
+            };
+
+            var response = await _httpClient.PostAsJsonAsync("watchlist", request);
+            return response.IsSuccessStatusCode;
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Watchlist API Error: {ex.Message}");
+            return false;
+        }
+    }
 }

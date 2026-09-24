@@ -29,12 +29,15 @@ public class ProductListViewModel : INotifyPropertyChanged
 
     public ICommand LoadProductsCommand { get; }
     public ICommand SearchCommand { get; }
+    public ICommand AddToWatchlistCommand { get; }
 
     public ProductListViewModel()
     {
         _apiService = new ApiService();
+
         LoadProductsCommand = new Command(async () => await LoadProductsAsync());
         SearchCommand = new Command(async () => await LoadProductsAsync(SearchText));
+        AddToWatchlistCommand = new Command<ProductDto>(async (product) => await AddToWatchlistAsync(product));
     }
 
     public async Task LoadProductsAsync(string? search = null)
@@ -55,6 +58,29 @@ public class ProductListViewModel : INotifyPropertyChanged
         finally
         {
             IsBusy = false;
+        }
+    }
+
+    private async Task AddToWatchlistAsync(ProductDto? product)
+    {
+        if (product == null) return;
+
+        string defaultUserId = "user123";
+
+        bool success = await _apiService.AddToWatchlistAsync(defaultUserId, product.Id, product.CurrentLowestPrice);
+
+        var mainPage = Application.Current?.Windows.FirstOrDefault()?.Page;
+
+        if (mainPage != null)
+        {
+            if (success)
+            {
+                await mainPage.DisplayAlertAsync("Success", $"{product.Name} added to your watchlist!", "OK");
+            }
+            else
+            {
+                await mainPage.DisplayAlertAsync("Error", "Could not add product to watchlist.", "OK");
+            }
         }
     }
 
