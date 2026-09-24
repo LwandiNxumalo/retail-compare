@@ -4,6 +4,12 @@
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+
+	<!-- Fix for java.exe exited with code 1 during D8/R8 compilation in .NET 10 -->
+	<JavaMaximumHeapSize>4G</JavaMaximumHeapSize>
+
+	<!-- Recommended for .NET 10 Android builds to prevent dexing method limit issues -->
+	<AndroidEnableMultiDex>true</AndroidEnableMultiDex>
   </PropertyGroup>
 
 </Project>
