@@ -5,8 +5,15 @@ A full-stack price tracking system built with **.NET 8 MAUI** and **ASP.NET Core
 ---
 
 ## 🏗️ System Architecture
+# 🛒 retail-compare
 
+A full-stack price tracking system built with **.NET 8 MAUI** and **ASP.NET Core Web API**. The platform monitors retail prices across stores, supports offline-first mobile browsing, and sends push alerts on price drops.
 
+---
+
+## 🏗️ System Architecture
+
+```text
                                   +-----------------------+
                                   |   Web Scraper Agent   |
                                   +-----------+-----------+
@@ -20,9 +27,7 @@ A full-stack price tracking system built with **.NET 8 MAUI** and **ASP.NET Core
             |                                 | Price Drop Event
             | (Push Alerts)                   v
             +-------------------- [ Firebase Cloud Messaging ]
-
---
-
+```
 ## ⚡ Solution Layout
 
 The repository uses a single Visual Studio solution structure:
