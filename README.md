@@ -6,7 +6,7 @@ A full-stack price tracking system built with **.NET 8 MAUI** and **ASP.NET Core
 
 ## 🏗️ System Architecture
 
-```text
+
                                   +-----------------------+
                                   |   Web Scraper Agent   |
                                   +-----------+-----------+
@@ -66,6 +66,5 @@ The repository uses a single Visual Studio solution structure:
 ### Quick Start
 
 1. **Clone the repository:**
-   ```bash
    git clone [https://github.com/LwandiNxumalo/retail-compare.git](https://github.com/LwandiNxumalo/retail-compare.git)
    cd retail-compare
