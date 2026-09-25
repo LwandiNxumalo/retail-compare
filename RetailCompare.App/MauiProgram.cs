@@ -1,4 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
+using RetailCompare.App.ViewModels;
+using RetailCompare.App.Views;
 
 namespace RetailCompare.App
 {
@@ -7,6 +9,8 @@ namespace RetailCompare.App
         public static MauiApp CreateMauiApp()
         {
             var builder = MauiApp.CreateBuilder();
+            builder.Services.AddTransient<WatchlistViewModel>();
+            builder.Services.AddTransient<WatchlistPage>();
             builder
                 .UseMauiApp<App>()
                 .ConfigureFonts(fonts =>

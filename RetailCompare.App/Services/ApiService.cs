@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
+using System.Net.Http;
 using System.Net.Http.Json;
+using System.Threading.Tasks;
+using Microsoft.Maui.Devices;
 using RetailCompare.Shared.models;
 
 namespace RetailCompare.App.Services;
@@ -13,8 +15,8 @@ public class ApiService
     // Platform-specific localhost base URL for Android Emulator vs Desktop
     private static string BaseUrl =>
         DeviceInfo.Platform == DevicePlatform.Android
-            ? "http://10.0.2.2:5189/api/" // 10.0.2.2 maps to host machine localhost in Android Emulator
-            : "http://localhost:5189/api/";
+            ? "http://10.0.2.2:44362/api/"
+            : "http://localhost:44362/api/";
 
     public ApiService()
     {
@@ -42,6 +44,20 @@ public class ApiService
         }
     }
 
+    public async Task<List<WatchlistRequest>> GetWatchlistAsync(string userId)
+    {
+        try
+        {
+            var response = await _httpClient.GetFromJsonAsync<List<WatchlistRequest>>($"watchlist/{Uri.EscapeDataString(userId)}");
+            return response ?? new List<WatchlistRequest>();
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Watchlist API Error: {ex.Message}");
+            return new List<WatchlistRequest>();
+        }
+    }
+
     public async Task<bool> AddToWatchlistAsync(string userId, int productId, decimal targetPrice)
     {
         try
@@ -59,6 +75,20 @@ public class ApiService
         catch (Exception ex)
         {
             System.Diagnostics.Debug.WriteLine($"Watchlist API Error: {ex.Message}");
+            return false;
+        }
+    }
+
+    public async Task<bool> RemoveFromWatchlistAsync(string userId, int productId)
+    {
+        try
+        {
+            var response = await _httpClient.DeleteAsync($"watchlist/{Uri.EscapeDataString(userId)}/{productId}");
+            return response.IsSuccessStatusCode;
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Watchlist Delete Error: {ex.Message}");
             return false;
         }
     }
