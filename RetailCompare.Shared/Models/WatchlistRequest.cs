@@ -9,5 +9,6 @@ namespace RetailCompare.Shared.models
         public string UserId { get; set; } = string.Empty;
         public int ProductId { get; set; }
         public decimal TargetPrice { get; set; }
+        public object Product { get; set; }
     }
 }

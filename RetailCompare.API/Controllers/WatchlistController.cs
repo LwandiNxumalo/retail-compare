@@ -21,6 +21,7 @@ public class WatchlistController : ControllerBase
     public async Task<ActionResult<IEnumerable<WatchlistRequest>>> GetUserWatchlist(string userId)
     {
         var items = await _context.Watchlists
+            .Include(w => w.Product)
             .Where(w => w.UserId == userId)
             .ToListAsync();
 
