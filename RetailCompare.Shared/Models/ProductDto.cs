@@ -11,5 +11,7 @@ namespace RetailCompare.Shared.models
         public string Category { get; set; } = string.Empty;
         public string ImageUrl { get; set; } = string.Empty;
         public decimal CurrentLowestPrice { get; set; }
+
+        public string Description { get; set; } = string.Empty;
     }
 }

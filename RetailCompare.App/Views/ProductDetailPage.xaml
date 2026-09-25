@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:RetailCompare.App.ViewModels"
+             x:Class="RetailCompare.App.Views.ProductDetailPage"
+             x:DataType="vm:ProductDetailViewModel"
+             Title="Product Details">
+
+    <Grid RowDefinitions="*, Auto">
+        <!-- Main Loading Indicator -->
+        <ActivityIndicator Grid.Row="0"
+                           IsRunning="{Binding IsLoading}"
+                           IsVisible="{Binding IsLoading}"
+                           HorizontalOptions="Center"
+                           VerticalOptions="Center"
+                           Color="#2563EB" />
+
+        <!-- Content Area -->
+        <ScrollView Grid.Row="0"
+                    IsVisible="{Binding IsLoading, Converter={StaticResource InverseBoolConverter}}"
+                    Padding="20">
+            <VerticalStackLayout Spacing="16" IsVisible="{Binding Product, Converter={StaticResource IsNotNullConverter}}">
+
+                <!-- Category Tag -->
+                <Border BackgroundColor="#E2E8F0"
+                        HorizontalOptions="Start"
+                        Padding="10,4"
+                        StrokeShape="RoundRectangle 4">
+                    <Label Text="{Binding Product.Category}"
+                           TextColor="#475569"
+                           FontSize="12"
+                           FontAttributes="Bold" />
+                </Border>
+
+                <!-- Product Name -->
+                <Label Text="{Binding Product.Name}"
+                       FontSize="22"
+                       FontAttributes="Bold"
+                       TextColor="#0F172A" />
+
+                <!-- Price Card -->
+                <Border BackgroundColor="#F8FAFC"
+                        Stroke="#E2E8F0"
+                        Padding="16"
+                        StrokeShape="RoundRectangle 8">
+                    <VerticalStackLayout Spacing="4">
+                        <Label Text="Current Lowest Price"
+                               FontSize="12"
+                               TextColor="#64748B" />
+                        <Label Text="{Binding Product.CurrentLowestPrice, StringFormat='R{0:F2}'}"
+                               FontSize="28"
+                               FontAttributes="Bold"
+                               TextColor="#16A34A" />
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Description / Specifications -->
+                <Label Text="Description"
+                       FontSize="16"
+                       FontAttributes="Bold"
+                       TextColor="#1E293B"
+                       Margin="0,10,0,0" />
+
+                <Label Text="{Binding Product.Description, TargetNullValue='No additional description available.'}"
+                       FontSize="14"
+                       TextColor="#334155"
+                       LineBreakMode="WordWrap" />
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <!-- Sticky Bottom CTA Button -->
+        <Border Grid.Row="1"
+        BackgroundColor="White"
+        Padding="16"
+        Stroke="#E2E8F0"
+        StrokeThickness="1">
+            <Button Text="Add to Watchlist"
+                    Command="{Binding AddToWatchlistCommand}"
+                    IsEnabled="{Binding IsAddingToWatchlist, Converter={StaticResource InverseBoolConverter}}"
+                    BackgroundColor="#2563EB"
+                    TextColor="White"
+                    FontAttributes="Bold"
+                    CornerRadius="8"
+                    HeightRequest="48" />
+        </Border>
+    </Grid>
+</ContentPage>

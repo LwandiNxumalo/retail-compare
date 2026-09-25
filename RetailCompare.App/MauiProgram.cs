@@ -24,9 +24,11 @@ namespace RetailCompare.App
 
             // Register ViewModels
             builder.Services.AddTransient<WatchlistViewModel>();
+            builder.Services.AddTransient<ProductDetailViewModel>();
 
             // Register Views
             builder.Services.AddTransient<WatchlistPage>();
+            builder.Services.AddTransient<ProductDetailPage>();
 
 #if DEBUG
             builder.Logging.AddDebug();

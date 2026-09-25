@@ -39,8 +39,22 @@ public class ApiService
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"API Error: {ex.Message}");
+            System.Diagnostics.Debug.WriteLine($"API Error (GetProducts): {ex.Message}");
             return new List<ProductDto>();
+        }
+    }
+
+    public async Task<ProductDto?> GetProductByIdAsync(int id)
+    {
+        try
+        {
+            var response = await _httpClient.GetFromJsonAsync<ProductDto>($"products/{id}");
+            return response;
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"API Error (GetProductById): {ex.Message}");
+            return null;
         }
     }
 

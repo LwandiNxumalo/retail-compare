@@ -7,7 +7,7 @@ namespace RetailCompare.App
         public AppShell()
         {
             InitializeComponent();
-            Routing.RegisterRoute(nameof(WatchlistPage), typeof(WatchlistPage));
+            Routing.RegisterRoute(nameof(ProductDetailPage), typeof(ProductDetailPage));
         }
     }
 }
