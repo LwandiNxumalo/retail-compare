@@ -1,10 +1,13 @@
-﻿namespace RetailCompare.App
+﻿using RetailCompare.App.Views;
+
+namespace RetailCompare.App
 {
     public partial class AppShell : Shell
     {
         public AppShell()
         {
-            //InitializeComponent();
+            InitializeComponent();
+            Routing.RegisterRoute(nameof(WatchlistPage), typeof(WatchlistPage));
         }
     }
 }
