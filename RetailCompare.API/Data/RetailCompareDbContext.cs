@@ -7,6 +7,8 @@ public class RetailCompareDbContext : DbContext
 {
     public RetailCompareDbContext(DbContextOptions<RetailCompareDbContext> options) : base(options) { }
 
+    public DbSet<User> Users { get; set; }
+
     public DbSet<ProductDto> Products => Set<ProductDto>();
     public DbSet<PriceHistoryDto> PriceHistories => Set<PriceHistoryDto>();
     public DbSet<WatchlistRequest> Watchlists => Set<WatchlistRequest>();

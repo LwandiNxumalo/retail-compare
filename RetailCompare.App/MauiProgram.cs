@@ -23,12 +23,21 @@ namespace RetailCompare.App
             builder.Services.AddSingleton<ApiService>();
 
             // Register ViewModels
+            builder.Services.AddTransient<MainPageViewModel>();
             builder.Services.AddTransient<WatchlistViewModel>();
             builder.Services.AddTransient<ProductDetailViewModel>();
+            builder.Services.AddTransient<LoginViewModel>();
+            builder.Services.AddTransient<RegisterViewModel>();
 
             // Register Views
+            builder.Services.AddTransient<MainPage>();
             builder.Services.AddTransient<WatchlistPage>();
             builder.Services.AddTransient<ProductDetailPage>();
+            builder.Services.AddTransient<LoginPage>();
+            builder.Services.AddTransient<RegisterPage>();
+
+            // Register Shell
+            builder.Services.AddSingleton<AppShell>();
 
 #if DEBUG
             builder.Logging.AddDebug();

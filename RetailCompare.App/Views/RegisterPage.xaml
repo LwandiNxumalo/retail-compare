@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:RetailCompare.App.ViewModels"
+             x:Class="RetailCompare.App.Views.RegisterPage"
+             x:DataType="vm:RegisterViewModel"
+             Title="Create Account">
+
+    <Grid VerticalOptions="Center" Padding="24">
+        <VerticalStackLayout Spacing="16" MaximumWidthRequest="400">
+
+            <Label Text="Create Account"
+                   FontSize="28"
+                   FontAttributes="Bold"
+                   TextColor="#0F172A"
+                   HorizontalOptions="Center" />
+
+            <Label Text="Sign up to start tracking prices and saving items."
+                   FontSize="14"
+                   TextColor="#64748B"
+                   HorizontalOptions="Center"
+                   Margin="0,0,0,16" />
+
+            <!-- Error Banner -->
+            <Border BackgroundColor="#FEE2E2"
+                    Stroke="#FCA5A5"
+                    Padding="12"
+                    StrokeShape="RoundRectangle 6"
+                    IsVisible="{Binding ErrorMessage, Converter={StaticResource IsNotNullConverter}}">
+                <Label Text="{Binding ErrorMessage}"
+                       TextColor="#DC2626"
+                       FontSize="13" />
+            </Border>
+
+            <!-- Inputs -->
+            <Entry Placeholder="Full Name"
+                   Text="{Binding FullName}" />
+
+            <Entry Placeholder="Email Address"
+                   Text="{Binding Email}"
+                   Keyboard="Email" />
+
+            <Entry Placeholder="Password"
+                   Text="{Binding Password}"
+                   IsPassword="True" />
+
+            <Entry Placeholder="Confirm Password"
+                   Text="{Binding ConfirmPassword}"
+                   IsPassword="True" />
+
+            <!-- Register CTA -->
+            <Button Text="Sign Up"
+                    Command="{Binding RegisterCommand}"
+                    IsEnabled="{Binding IsBusy, Converter={StaticResource InverseBoolConverter}}"
+                    BackgroundColor="#2563EB"
+                    TextColor="White"
+                    FontAttributes="Bold"
+                    CornerRadius="8"
+                    HeightRequest="48"
+                    Margin="0,8,0,0" />
+
+            <ActivityIndicator IsRunning="{Binding IsBusy}"
+                               IsVisible="{Binding IsBusy}"
+                               Color="#2563EB"
+                               HorizontalOptions="Center" />
+
+            <!-- Back to Login -->
+            <HorizontalStackLayout HorizontalOptions="Center" Spacing="4" Margin="0,16,0,0">
+                <Label Text="Already have an account?" TextColor="#64748B" VerticalOptions="Center" />
+                <Button Text="Sign In"
+                        Command="{Binding GoToLoginCommand}"
+                        Style="{StaticResource TextButton}"
+                        TextColor="#2563EB"
+                        FontAttributes="Bold" />
+            </HorizontalStackLayout>
+
+        </VerticalStackLayout>
+    </Grid>
+</ContentPage>

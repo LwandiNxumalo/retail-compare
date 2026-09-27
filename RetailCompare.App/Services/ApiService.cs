@@ -1,109 +1,173 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Net.Http;
+﻿using System.Net.Http.Headers;
 using System.Net.Http.Json;
-using System.Threading.Tasks;
-using Microsoft.Maui.Devices;
 using RetailCompare.Shared.models;
 
-namespace RetailCompare.App.Services;
-
-public class ApiService
+namespace RetailCompare.App.Services
 {
-    private readonly HttpClient _httpClient;
-
-    // Platform-specific localhost base URL for Android Emulator vs Desktop
-    private static string BaseUrl =>
-        DeviceInfo.Platform == DevicePlatform.Android
-            ? "http://10.0.2.2:44362/api/"
-            : "http://localhost:44362/api/";
-
-    public ApiService()
+    public class ApiService
     {
-        _httpClient = new HttpClient
-        {
-            BaseAddress = new Uri(BaseUrl)
-        };
-    }
+        private readonly HttpClient _httpClient;
+        private const string TokenKey = "auth_token";
+        private const string UserEmailKey = "user_email";
+        private const string UserIdKey = "user_id";
 
-    public async Task<List<ProductDto>> GetProductsAsync(string? search = null)
-    {
-        try
+        public ApiService(HttpClient httpClient)
         {
-            var url = string.IsNullOrWhiteSpace(search)
-                ? "products"
-                : $"products?search={Uri.EscapeDataString(search)}";
+            _httpClient = httpClient;
+        }
 
-            var response = await _httpClient.GetFromJsonAsync<List<ProductDto>>(url);
-            return response ?? new List<ProductDto>();
-        }
-        catch (Exception ex)
-        {
-            System.Diagnostics.Debug.WriteLine($"API Error (GetProducts): {ex.Message}");
-            return new List<ProductDto>();
-        }
-    }
+        #region Authentication & Token Management
 
-    public async Task<ProductDto?> GetProductByIdAsync(int id)
-    {
-        try
+        public async Task SetAuthHeaderAsync()
         {
-            var response = await _httpClient.GetFromJsonAsync<ProductDto>($"products/{id}");
-            return response;
+            var token = await SecureStorage.Default.GetAsync(TokenKey);
+            if (!string.IsNullOrEmpty(token))
+            {
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            }
+            else
+            {
+                _httpClient.DefaultRequestHeaders.Authorization = null;
+            }
         }
-        catch (Exception ex)
+
+        public async Task<bool> IsAuthenticatedAsync()
         {
-            System.Diagnostics.Debug.WriteLine($"API Error (GetProductById): {ex.Message}");
+            var token = await SecureStorage.Default.GetAsync(TokenKey);
+            return !string.IsNullOrEmpty(token);
+        }
+
+        public async Task<AuthResponseDto?> RegisterAsync(UserRegisterDto registerDto)
+        {
+            try
+            {
+                var response = await _httpClient.PostAsJsonAsync("auth/register", registerDto);
+                if (response.IsSuccessStatusCode)
+                {
+                    var result = await response.Content.ReadFromJsonAsync<AuthResponseDto>();
+                    if (result != null && !string.IsNullOrEmpty(result.Token))
+                    {
+                        await SaveAuthSessionAsync(result);
+                        return result;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"API Error (Register): {ex.Message}");
+            }
+
             return null;
         }
-    }
 
-    public async Task<List<WatchlistRequest>> GetWatchlistAsync(string userId)
-    {
-        try
+        public async Task<AuthResponseDto?> LoginAsync(UserLoginDto loginDto)
         {
-            var response = await _httpClient.GetFromJsonAsync<List<WatchlistRequest>>($"watchlist/{Uri.EscapeDataString(userId)}");
-            return response ?? new List<WatchlistRequest>();
-        }
-        catch (Exception ex)
-        {
-            System.Diagnostics.Debug.WriteLine($"Watchlist API Error: {ex.Message}");
-            return new List<WatchlistRequest>();
-        }
-    }
-
-    public async Task<bool> AddToWatchlistAsync(string userId, int productId, decimal targetPrice)
-    {
-        try
-        {
-            var request = new WatchlistRequest
+            try
             {
-                UserId = userId,
-                ProductId = productId,
-                TargetPrice = targetPrice
-            };
+                var response = await _httpClient.PostAsJsonAsync("auth/login", loginDto);
+                if (response.IsSuccessStatusCode)
+                {
+                    var result = await response.Content.ReadFromJsonAsync<AuthResponseDto>();
+                    if (result != null && !string.IsNullOrEmpty(result.Token))
+                    {
+                        await SaveAuthSessionAsync(result);
+                        return result;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"API Error (Login): {ex.Message}");
+            }
 
-            var response = await _httpClient.PostAsJsonAsync("watchlist", request);
-            return response.IsSuccessStatusCode;
+            return null;
         }
-        catch (Exception ex)
-        {
-            System.Diagnostics.Debug.WriteLine($"Watchlist API Error: {ex.Message}");
-            return false;
-        }
-    }
 
-    public async Task<bool> RemoveFromWatchlistAsync(string userId, int productId)
-    {
-        try
+        public async Task LogoutAsync()
         {
-            var response = await _httpClient.DeleteAsync($"watchlist/{Uri.EscapeDataString(userId)}/{productId}");
-            return response.IsSuccessStatusCode;
+            SecureStorage.Default.Remove(TokenKey);
+            SecureStorage.Default.Remove(UserEmailKey);
+            SecureStorage.Default.Remove(UserIdKey);
+            _httpClient.DefaultRequestHeaders.Authorization = null;
+            await Task.CompletedTask;
         }
-        catch (Exception ex)
+
+        private async Task SaveAuthSessionAsync(AuthResponseDto auth)
         {
-            System.Diagnostics.Debug.WriteLine($"Watchlist Delete Error: {ex.Message}");
-            return false;
+            await SecureStorage.Default.SetAsync(TokenKey, auth.Token);
+            await SecureStorage.Default.SetAsync(UserEmailKey, auth.Email);
+            await SecureStorage.Default.SetAsync(UserIdKey, auth.UserId);
+            await SetAuthHeaderAsync();
         }
+
+        public async Task<string?> GetCurrentUserIdAsync()
+        {
+            return await SecureStorage.Default.GetAsync(UserIdKey);
+        }
+
+        #endregion
+
+        #region Product Endpoints
+
+        public async Task<List<ProductDto>> GetProductsAsync(string? search = null)
+        {
+            try
+            {
+                await SetAuthHeaderAsync();
+                var url = string.IsNullOrWhiteSpace(search)
+                    ? "products"
+                    : $"products?search={Uri.EscapeDataString(search)}";
+
+                var response = await _httpClient.GetFromJsonAsync<List<ProductDto>>(url);
+                return response ?? new List<ProductDto>();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"API Error (GetProducts): {ex.Message}");
+                return new List<ProductDto>();
+            }
+        }
+
+        public async Task<ProductDto?> GetProductByIdAsync(int id)
+        {
+            try
+            {
+                await SetAuthHeaderAsync();
+                return await _httpClient.GetFromJsonAsync<ProductDto>($"products/{id}");
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"API Error (GetProductById): {ex.Message}");
+                return null;
+            }
+        }
+
+        #endregion
+
+        #region Watchlist Endpoints
+
+        public async Task<bool> AddToWatchlistAsync(string userId, int productId, decimal targetPrice)
+        {
+            try
+            {
+                await SetAuthHeaderAsync();
+                var request = new WatchlistRequest
+                {
+                    UserId = userId,
+                    ProductId = productId,
+                    TargetPrice = targetPrice
+                };
+
+                var response = await _httpClient.PostAsJsonAsync("watchlist", request);
+                return response.IsSuccessStatusCode;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"API Error (AddToWatchlist): {ex.Message}");
+                return false;
+            }
+        }
+
+        #endregion
     }
 }
