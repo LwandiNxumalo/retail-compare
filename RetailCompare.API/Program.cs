@@ -7,34 +7,24 @@ using RetailCompare.API.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// 1. Register DbContext with SQLite connection string
+// Configure SQLite Database Context
 builder.Services.AddDbContext<RetailCompareDbContext>(options =>
-    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")
-        ?? "Data Source=retailcompare.db"));
+    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// 2. Add CORS services
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowAll", policy =>
-    {
-        policy.AllowAnyOrigin()
-              .AllowAnyMethod()
-              .AllowAnyHeader();
-    });
-});
-
-// 3. Register Custom Services
+// Register Token Service
 builder.Services.AddScoped<ITokenService, TokenService>();
 
-// 4. Configure JWT Authentication
-var jwtKey = builder.Configuration["Jwt:Key"] ?? "SuperSecretKey_ForRetailCompareApp_2026_KeyMustBeLongEnough!";
+// Configure JWT Authentication
+var secretKey = builder.Configuration["Jwt:Key"] ?? "SuperSecretKey_ForRetailCompareApp_2026_KeyMustBeLongEnough!";
+var key = Encoding.UTF8.GetBytes(secretKey);
+
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey)),
+            IssuerSigningKey = new SymmetricSecurityKey(key),
             ValidateIssuer = true,
             ValidIssuer = builder.Configuration["Jwt:Issuer"] ?? "RetailCompareAPI",
             ValidateAudience = true,
@@ -43,26 +33,21 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
-// Add Controllers, Swagger, etc.
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline
+// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
-// Enable CORS Middleware (Must be before UseAuthentication / UseAuthorization)
-app.UseCors("AllowAll");
-
 app.UseHttpsRedirection();
 
-// Enable Authentication before Authorization
 app.UseAuthentication();
 app.UseAuthorization();
 

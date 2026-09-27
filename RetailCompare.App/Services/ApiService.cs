@@ -146,14 +146,28 @@ namespace RetailCompare.App.Services
 
         #region Watchlist Endpoints
 
-        public async Task<bool> AddToWatchlistAsync(string userId, int productId, decimal targetPrice)
+        public async Task<List<WatchlistItemDto>> GetWatchlistAsync()
         {
             try
             {
                 await SetAuthHeaderAsync();
-                var request = new WatchlistRequest
+                var response = await _httpClient.GetFromJsonAsync<List<WatchlistItemDto>>("watchlist");
+                return response ?? [];
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"API Error (GetWatchlist): {ex.Message}");
+                return [];
+            }
+        }
+
+        public async Task<bool> AddToWatchlistAsync(int productId, decimal targetPrice)
+        {
+            try
+            {
+                await SetAuthHeaderAsync();
+                var request = new WatchlistRequestDto
                 {
-                    UserId = userId,
                     ProductId = productId,
                     TargetPrice = targetPrice
                 };
@@ -164,6 +178,21 @@ namespace RetailCompare.App.Services
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"API Error (AddToWatchlist): {ex.Message}");
+                return false;
+            }
+        }
+
+        public async Task<bool> RemoveFromWatchlistAsync(int id)
+        {
+            try
+            {
+                await SetAuthHeaderAsync();
+                var response = await _httpClient.DeleteAsync($"watchlist/{id}");
+                return response.IsSuccessStatusCode;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"API Error (RemoveFromWatchlist): {ex.Message}");
                 return false;
             }
         }

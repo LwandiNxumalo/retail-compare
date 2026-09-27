@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using RetailCompare.API.Data;
 
@@ -10,9 +11,11 @@ using RetailCompare.API.Data;
 namespace RetailCompare.API.Migrations
 {
     [DbContext(typeof(RetailCompareDbContext))]
-    partial class RetailCompareDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260927183554_InitialSchemaUpdate")]
+    partial class InitialSchemaUpdate
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "10.0.12");

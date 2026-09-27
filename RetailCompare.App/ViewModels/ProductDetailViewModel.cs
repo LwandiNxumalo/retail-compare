@@ -9,7 +9,6 @@ namespace RetailCompare.App.ViewModels
     public partial class ProductDetailViewModel : ObservableObject
     {
         private readonly ApiService _apiService;
-        private const string CurrentUserId = "user123";
 
         [ObservableProperty]
         private int _productId;
@@ -66,21 +65,20 @@ namespace RetailCompare.App.ViewModels
         {
             if (Product == null || Shell.Current == null) return;
 
-            // Prompt user for a target price, defaulting to current price
             string result = await Shell.Current.DisplayPromptAsync(
-            "Add to Watchlist",
-            $"Enter your target price for {Product.Name}:",
-            accept: "Add",
-            cancel: "Cancel",
-            placeholder: $"{Product.CurrentLowestPrice:F2}",
-            keyboard: Keyboard.Numeric);
+                "Add to Watchlist",
+                $"Enter your target price for {Product.Name}:",
+                accept: "Add",
+                cancel: "Cancel",
+                placeholder: $"{Product.CurrentLowestPrice:F2}",
+                keyboard: Keyboard.Numeric);
 
             if (string.IsNullOrWhiteSpace(result)) return;
 
             if (decimal.TryParse(result, out decimal targetPrice) && targetPrice > 0)
             {
                 IsAddingToWatchlist = true;
-                bool success = await _apiService.AddToWatchlistAsync(CurrentUserId, Product.Id, targetPrice);
+                bool success = await _apiService.AddToWatchlistAsync(Product.Id, targetPrice);
                 IsAddingToWatchlist = false;
 
                 if (success)

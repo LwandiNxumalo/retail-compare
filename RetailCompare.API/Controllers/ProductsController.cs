@@ -20,7 +20,7 @@ public class ProductsController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<IEnumerable<ProductDto>>> GetProducts([FromQuery] string? search)
     {
-        var query = _context.Products.AsQueryable();
+        var query = _context.Products.AsNoTracking();
 
         if (!string.IsNullOrWhiteSpace(search))
         {
@@ -28,7 +28,18 @@ public class ProductsController : ControllerBase
             query = query.Where(p => p.Name.ToLower().Contains(term) || p.Category.ToLower().Contains(term));
         }
 
-        var products = await query.ToListAsync();
+        var products = await query
+            .Select(p => new ProductDto
+            {
+                Id = p.Id,
+                Name = p.Name,
+                Category = p.Category,
+                CurrentLowestPrice = p.Price, // Maps entity Price -> ProductDto CurrentLowestPrice
+                ImageUrl = p.ImageUrl ?? string.Empty,
+                Description = p.Description ?? string.Empty
+            })
+            .ToListAsync();
+
         return Ok(products);
     }
 
@@ -36,7 +47,19 @@ public class ProductsController : ControllerBase
     [HttpGet("{id:int}")]
     public async Task<ActionResult<ProductDto>> GetProduct(int id)
     {
-        var product = await _context.Products.FindAsync(id);
+        var product = await _context.Products
+            .AsNoTracking()
+            .Where(p => p.Id == id)
+            .Select(p => new ProductDto
+            {
+                Id = p.Id,
+                Name = p.Name,
+                Category = p.Category,
+                CurrentLowestPrice = p.Price,
+                ImageUrl = p.ImageUrl ?? string.Empty,
+                Description = p.Description ?? string.Empty
+            })
+            .FirstOrDefaultAsync();
 
         if (product == null)
         {

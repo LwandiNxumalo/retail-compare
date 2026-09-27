@@ -31,9 +31,9 @@ public class ProductListViewModel : INotifyPropertyChanged
     public ICommand SearchCommand { get; }
     public ICommand AddToWatchlistCommand { get; }
 
-    public ProductListViewModel()
+    public ProductListViewModel(ApiService apiService)
     {
-        _apiService = new ApiService();
+        _apiService = apiService;
 
         LoadProductsCommand = new Command(async () => await LoadProductsAsync());
         SearchCommand = new Command(async () => await LoadProductsAsync(SearchText));
@@ -65,21 +65,17 @@ public class ProductListViewModel : INotifyPropertyChanged
     {
         if (product == null) return;
 
-        string defaultUserId = "user123";
+        bool success = await _apiService.AddToWatchlistAsync(product.Id, product.CurrentLowestPrice);
 
-        bool success = await _apiService.AddToWatchlistAsync(defaultUserId, product.Id, product.CurrentLowestPrice);
-
-        var mainPage = Application.Current?.Windows.FirstOrDefault()?.Page;
-
-        if (mainPage != null)
+        if (Shell.Current != null)
         {
             if (success)
             {
-                await mainPage.DisplayAlertAsync("Success", $"{product.Name} added to your watchlist!", "OK");
+                await Shell.Current.DisplayAlertAsync("Success", $"{product.Name} added to your watchlist!", "OK");
             }
             else
             {
-                await mainPage.DisplayAlertAsync("Error", "Could not add product to watchlist.", "OK");
+                await Shell.Current.DisplayAlertAsync("Error", "Could not add product to watchlist.", "OK");
             }
         }
     }

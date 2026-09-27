@@ -4,7 +4,7 @@
              xmlns:vm="clr-namespace:RetailCompare.App.ViewModels"
              xmlns:models="clr-namespace:RetailCompare.Shared.models;assembly=RetailCompare.Shared"
              x:Class="RetailCompare.App.MainPage"
-             x:DataType="vm:MainPageViewModel"
+             x:DataType="vm:ProductListViewModel"
              Title="RetailCompare">
 
     <Grid RowDefinitions="Auto, *">
@@ -17,7 +17,7 @@
                     Padding="6">
                 <SearchBar Placeholder="Search products or categories..."
                            Text="{Binding SearchText, Mode=TwoWay}"
-                           SearchCommand="{Binding SearchProductsCommand}"
+                           SearchCommand="{Binding SearchCommand}"
                            PlaceholderColor="#94A3B8"
                            TextColor="White"
                            BackgroundColor="Transparent" />
@@ -26,11 +26,11 @@
 
         <!-- Pull to Refresh List -->
         <RefreshView Grid.Row="1"
-                     IsRefreshing="{Binding IsLoading}"
+                     IsRefreshing="{Binding IsBusy}"
                      Command="{Binding LoadProductsCommand}">
             <Grid>
                 <!-- Empty State Message -->
-                <VerticalStackLayout IsVisible="{Binding IsEmpty}"
+                <VerticalStackLayout IsVisible="{Binding Products.Count, Converter={StaticResource InverseBoolConverter}}"
                                      HorizontalOptions="Center"
                                      VerticalOptions="Center"
                                      Spacing="8">
@@ -56,10 +56,6 @@
                                     StrokeShape="RoundRectangle 8"
                                     Stroke="#E2E8F0"
                                     BackgroundColor="White">
-                                <Border.GestureRecognizers>
-                                    <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:MainPageViewModel}}, Path=SelectProductCommand}"
-                                                          CommandParameter="{Binding .}" />
-                                </Border.GestureRecognizers>
 
                                 <Grid ColumnDefinitions="*, Auto" RowDefinitions="Auto, Auto">
                                     <!-- Category Tag -->

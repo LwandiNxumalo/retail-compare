@@ -4,18 +4,17 @@ namespace RetailCompare.App;
 
 public partial class MainPage : ContentPage
 {
-    public MainPage()
+    private readonly ProductListViewModel _viewModel;
+
+    public MainPage(ProductListViewModel viewModel)
     {
         InitializeComponent();
+        BindingContext = _viewModel = viewModel;
     }
 
     protected override async void OnAppearing()
     {
         base.OnAppearing();
-
-        if (BindingContext is ProductListViewModel vm)
-        {
-            await vm.LoadProductsAsync();
-        }
+        await _viewModel.LoadProductsAsync();
     }
 }

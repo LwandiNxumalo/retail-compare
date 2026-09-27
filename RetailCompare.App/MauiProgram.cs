@@ -19,11 +19,15 @@ namespace RetailCompare.App
                     fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
                 });
 
-            // Register Services
+            // Register HttpClient & ApiService
+            builder.Services.AddSingleton(sp => new HttpClient
+            {
+                BaseAddress = new Uri("https://your-api-domain.com/api/") // Replace with API URL
+            });
             builder.Services.AddSingleton<ApiService>();
 
             // Register ViewModels
-            builder.Services.AddTransient<MainPageViewModel>();
+            builder.Services.AddTransient<ProductListViewModel>();
             builder.Services.AddTransient<WatchlistViewModel>();
             builder.Services.AddTransient<ProductDetailViewModel>();
             builder.Services.AddTransient<LoginViewModel>();
