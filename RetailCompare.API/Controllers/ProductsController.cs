@@ -7,14 +7,9 @@ namespace RetailCompare.API.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class ProductsController : ControllerBase
+public class ProductsController(RetailCompareDbContext context) : ControllerBase
 {
-    private readonly RetailCompareDbContext _context;
-
-    public ProductsController(RetailCompareDbContext context)
-    {
-        _context = context;
-    }
+    private readonly RetailCompareDbContext _context = context;
 
     // GET: api/products
     [HttpGet]
@@ -24,8 +19,10 @@ public class ProductsController : ControllerBase
 
         if (!string.IsNullOrWhiteSpace(search))
         {
-            var term = search.ToLower();
-            query = query.Where(p => p.Name.ToLower().Contains(term) || p.Category.ToLower().Contains(term));
+            var term = search.Trim().ToLower();
+            // Refactored to avoid client-side allocation warning
+            query = query.Where(p => EF.Functions.Like(p.Name, $"%{term}%") ||
+                                     EF.Functions.Like(p.Category, $"%{term}%"));
         }
 
         var products = await query
@@ -34,7 +31,7 @@ public class ProductsController : ControllerBase
                 Id = p.Id,
                 Name = p.Name,
                 Category = p.Category,
-                CurrentLowestPrice = p.Price, // Maps entity Price -> ProductDto CurrentLowestPrice
+                CurrentLowestPrice = p.Price,
                 ImageUrl = p.ImageUrl ?? string.Empty,
                 Description = p.Description ?? string.Empty
             })

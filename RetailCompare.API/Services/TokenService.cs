@@ -8,11 +8,12 @@ namespace RetailCompare.API.Services;
 
 public class TokenService(IConfiguration config) : ITokenService
 {
-    private readonly IConfiguration _config = config;
-
     public string CreateToken(User user)
     {
         ArgumentNullException.ThrowIfNull(user);
+
+        var secretKey = config["Jwt:Key"]
+            ?? throw new InvalidOperationException("Jwt:Key configuration is missing.");
 
         var claims = new List<Claim>
         {
@@ -21,7 +22,6 @@ public class TokenService(IConfiguration config) : ITokenService
             new(ClaimTypes.Name, user.FullName)
         };
 
-        var secretKey = _config["Jwt:Key"] ?? "SuperSecretKey_ForRetailCompareApp_2026_KeyMustBeLongEnough!";
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256Signature);
 
@@ -30,8 +30,8 @@ public class TokenService(IConfiguration config) : ITokenService
             Subject = new ClaimsIdentity(claims),
             Expires = DateTime.UtcNow.AddDays(7),
             SigningCredentials = creds,
-            Issuer = _config["Jwt:Issuer"] ?? "RetailCompareAPI",
-            Audience = _config["Jwt:Audience"] ?? "RetailCompareApp"
+            Issuer = config["Jwt:Issuer"] ?? "RetailCompareAPI",
+            Audience = config["Jwt:Audience"] ?? "RetailCompareApp"
         };
 
         var tokenHandler = new JwtSecurityTokenHandler();

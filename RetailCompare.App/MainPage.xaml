@@ -17,7 +17,7 @@
                     Padding="6">
                 <SearchBar Placeholder="Search products or categories..."
                            Text="{Binding SearchText, Mode=TwoWay}"
-                           SearchCommand="{Binding SearchCommand}"
+                           SearchCommand="{Binding LoadProductsCommand}"
                            PlaceholderColor="#94A3B8"
                            TextColor="White"
                            BackgroundColor="Transparent" />
@@ -30,7 +30,7 @@
                      Command="{Binding LoadProductsCommand}">
             <Grid>
                 <!-- Empty State Message -->
-                <VerticalStackLayout IsVisible="{Binding Products.Count, Converter={StaticResource InverseBoolConverter}}"
+                <VerticalStackLayout IsVisible="{Binding Products.Count, Converter={StaticResource InvertedBoolConverter}}"
                                      HorizontalOptions="Center"
                                      VerticalOptions="Center"
                                      Spacing="8">

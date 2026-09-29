@@ -1,10 +1,18 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
              xmlns:vm="clr-namespace:RetailCompare.App.ViewModels"
              x:Class="RetailCompare.App.Views.ProductDetailPage"
              x:DataType="vm:ProductDetailViewModel"
              Title="Product Details">
+
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <toolkit:IsNotNullConverter x:Key="IsNotNullConverter" />
+            <toolkit:InvertedBoolConverter x:Key="InvertedBoolConverter" />
+        </ResourceDictionary>
+    </ContentPage.Resources>
 
     <Grid RowDefinitions="*, Auto">
         <!-- Main Loading Indicator -->
@@ -17,7 +25,7 @@
 
         <!-- Content Area -->
         <ScrollView Grid.Row="0"
-                    IsVisible="{Binding IsLoading, Converter={StaticResource InverseBoolConverter}}"
+                    IsVisible="{Binding IsLoading, Converter={StaticResource InvertedBoolConverter}}"
                     Padding="20">
             <VerticalStackLayout Spacing="16" IsVisible="{Binding Product, Converter={StaticResource IsNotNullConverter}}">
 
@@ -70,13 +78,13 @@
 
         <!-- Sticky Bottom CTA Button -->
         <Border Grid.Row="1"
-        BackgroundColor="White"
-        Padding="16"
-        Stroke="#E2E8F0"
-        StrokeThickness="1">
+                BackgroundColor="White"
+                Padding="16"
+                Stroke="#E2E8F0"
+                StrokeThickness="1">
             <Button Text="Add to Watchlist"
                     Command="{Binding AddToWatchlistCommand}"
-                    IsEnabled="{Binding IsAddingToWatchlist, Converter={StaticResource InverseBoolConverter}}"
+                    IsEnabled="{Binding IsAddingToWatchlist, Converter={StaticResource InvertedBoolConverter}}"
                     BackgroundColor="#2563EB"
                     TextColor="White"
                     FontAttributes="Bold"

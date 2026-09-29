@@ -1,86 +1,74 @@
 ﻿using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
-using System.Windows.Input;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using RetailCompare.App.Services;
 using RetailCompare.Shared.models;
 
-namespace RetailCompare.App.ViewModels;
-
-public class ProductListViewModel : INotifyPropertyChanged
+namespace RetailCompare.App.ViewModels
 {
-    private readonly ApiService _apiService;
-    private bool _isBusy;
-    private string _searchText = string.Empty;
-
-    public ObservableCollection<ProductDto> Products { get; } = new();
-
-    public bool IsBusy
+    public partial class ProductListViewModel : ObservableObject
     {
-        get => _isBusy;
-        set { _isBusy = value; OnPropertyChanged(); }
-    }
+        private readonly ApiService _apiService;
 
-    public string SearchText
-    {
-        get => _searchText;
-        set { _searchText = value; OnPropertyChanged(); }
-    }
+        [ObservableProperty]
+        public partial bool IsBusy { get; set; }
 
-    public ICommand LoadProductsCommand { get; }
-    public ICommand SearchCommand { get; }
-    public ICommand AddToWatchlistCommand { get; }
+        [ObservableProperty]
+        public partial string SearchText { get; set; } = string.Empty;
 
-    public ProductListViewModel(ApiService apiService)
-    {
-        _apiService = apiService;
+        public ObservableCollection<ProductDto> Products { get; } = [];
 
-        LoadProductsCommand = new Command(async () => await LoadProductsAsync());
-        SearchCommand = new Command(async () => await LoadProductsAsync(SearchText));
-        AddToWatchlistCommand = new Command<ProductDto>(async (product) => await AddToWatchlistAsync(product));
-    }
-
-    public async Task LoadProductsAsync(string? search = null)
-    {
-        if (IsBusy) return;
-
-        try
+        public ProductListViewModel(ApiService apiService)
         {
-            IsBusy = true;
-            var items = await _apiService.GetProductsAsync(search);
+            _apiService = apiService;
+        }
 
-            Products.Clear();
-            foreach (var item in items)
+        [RelayCommand]
+        public async Task LoadProductsAsync(string? search = null)
+        {
+            if (IsBusy) return;
+
+            try
             {
-                Products.Add(item);
+                IsBusy = true;
+                var items = await _apiService.GetProductsAsync(search ?? SearchText);
+
+                Products.Clear();
+                foreach (var item in items)
+                {
+                    Products.Add(item);
+                }
+            }
+            finally
+            {
+                IsBusy = false;
             }
         }
-        finally
+
+        [RelayCommand]
+        public async Task AddToWatchlistAsync(ProductDto? product)
         {
-            IsBusy = false;
-        }
-    }
+            if (product == null) return;
 
-    private async Task AddToWatchlistAsync(ProductDto? product)
-    {
-        if (product == null) return;
-
-        bool success = await _apiService.AddToWatchlistAsync(product.Id, product.CurrentLowestPrice);
-
-        if (Shell.Current != null)
-        {
-            if (success)
+            var request = new WatchlistRequestDto
             {
-                await Shell.Current.DisplayAlertAsync("Success", $"{product.Name} added to your watchlist!", "OK");
-            }
-            else
+                ProductId = product.Id,
+                TargetPrice = product.CurrentLowestPrice
+            };
+
+            bool success = await _apiService.AddToWatchlistAsync(request);
+
+            if (Shell.Current != null)
             {
-                await Shell.Current.DisplayAlertAsync("Error", "Could not add product to watchlist.", "OK");
+                if (success)
+                {
+                    await Shell.Current.DisplayAlertAsync("Success", $"{product.Name} added to your watchlist!", "OK");
+                }
+                else
+                {
+                    await Shell.Current.DisplayAlertAsync("Error", "Could not add product to watchlist.", "OK");
+                }
             }
         }
     }
-
-    public event PropertyChangedEventHandler? PropertyChanged;
-    protected void OnPropertyChanged([CallerMemberName] string? name = null) =>
-        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
 }

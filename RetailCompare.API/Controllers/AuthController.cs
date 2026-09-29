@@ -10,9 +10,6 @@ namespace RetailCompare.API.Controllers;
 [Route("api/[controller]")]
 public class AuthController(RetailCompareDbContext context, ITokenService tokenService) : ControllerBase
 {
-    private readonly RetailCompareDbContext _context = context;
-    private readonly ITokenService _tokenService = tokenService;
-
     [HttpPost("register")]
     public async Task<ActionResult<AuthResponseDto>> Register(UserRegisterDto request)
     {
@@ -21,22 +18,24 @@ public class AuthController(RetailCompareDbContext context, ITokenService tokenS
             return BadRequest("Email and Password are required.");
         }
 
-        if (await _context.Users.AnyAsync(u => u.Email.Equals(request.Email, StringComparison.OrdinalIgnoreCase)))
+        var normalizedEmail = request.Email.Trim().ToLower();
+
+        if (await context.Users.AnyAsync(u => u.Email == normalizedEmail))
         {
             return BadRequest("User with this email already exists.");
         }
 
         var user = new User
         {
-            Email = request.Email.Trim().ToLower(),
+            Email = normalizedEmail,
             FullName = request.FullName.Trim(),
             PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password)
         };
 
-        _context.Users.Add(user);
-        await _context.SaveChangesAsync();
+        context.Users.Add(user);
+        await context.SaveChangesAsync();
 
-        var token = _tokenService.CreateToken(user);
+        var token = tokenService.CreateToken(user);
 
         return Ok(new AuthResponseDto
         {
@@ -50,14 +49,15 @@ public class AuthController(RetailCompareDbContext context, ITokenService tokenS
     [HttpPost("login")]
     public async Task<ActionResult<AuthResponseDto>> Login(UserLoginDto request)
     {
-        var user = await _context.Users.FirstOrDefaultAsync(u => u.Email.Equals(request.Email, StringComparison.OrdinalIgnoreCase));
+        var normalizedEmail = request.Email.Trim().ToLower();
+        var user = await context.Users.FirstOrDefaultAsync(u => u.Email == normalizedEmail);
 
         if (user == null || !BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
         {
             return Unauthorized("Invalid email or password.");
         }
 
-        var token = _tokenService.CreateToken(user);
+        var token = tokenService.CreateToken(user);
 
         return Ok(new AuthResponseDto
         {

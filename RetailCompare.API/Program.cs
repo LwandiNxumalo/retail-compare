@@ -15,7 +15,8 @@ builder.Services.AddDbContext<RetailCompareDbContext>(options =>
 builder.Services.AddScoped<ITokenService, TokenService>();
 
 // Configure JWT Authentication
-var secretKey = builder.Configuration["Jwt:Key"] ?? "SuperSecretKey_ForRetailCompareApp_2026_KeyMustBeLongEnough!";
+var secretKey = builder.Configuration["Jwt:Key"]
+    ?? throw new InvalidOperationException("Jwt:Key configuration is missing.");
 var key = Encoding.UTF8.GetBytes(secretKey);
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

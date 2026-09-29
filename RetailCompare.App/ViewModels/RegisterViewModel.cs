@@ -71,10 +71,10 @@ namespace RetailCompare.App.ViewModels
                     Password = Password
                 };
 
-                // Check for non-null AuthResponseDto returned from RegisterAsync
-                var response = await _apiService.RegisterAsync(registerDto);
+                // RegisterAsync returns a non-nullable bool, so check it directly
+                bool success = await _apiService.RegisterAsync(registerDto);
 
-                if (response != null)
+                if (success)
                 {
                     if (SaveCredentials)
                     {

@@ -61,7 +61,7 @@ namespace RetailCompare.App.ViewModels
                 var request = new UserLoginDto { Email = Email.Trim(), Password = Password };
                 var result = await _apiService.LoginAsync(request);
 
-                if (result != null && !string.IsNullOrEmpty(result.Token))
+                if (result)
                 {
                     // Handle Remember Me feature
                     if (RememberMe)
@@ -101,14 +101,19 @@ namespace RetailCompare.App.ViewModels
                 return;
             }
 
-            // Prompt user or execute password reset API call
-            await Shell.Current.DisplayAlertAsync("Password Reset", $"A password reset link has been sent to {Email}.", "OK");
+            if (Shell.Current != null)
+            {
+                await Shell.Current.DisplayAlertAsync("Password Reset", $"A password reset link has been sent to {Email}.", "OK");
+            }
         }
 
         [RelayCommand]
         public async Task GoToRegisterAsync()
         {
-            await Shell.Current.GoToAsync(nameof(Views.RegisterPage));
+            if (Shell.Current != null)
+            {
+                await Shell.Current.GoToAsync(nameof(Views.RegisterPage));
+            }
         }
     }
 }

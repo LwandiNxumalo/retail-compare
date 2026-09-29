@@ -80,7 +80,14 @@ namespace RetailCompare.App.ViewModels
             if (decimal.TryParse(result, out decimal targetPrice) && targetPrice > 0)
             {
                 IsAddingToWatchlist = true;
-                bool success = await _apiService.AddToWatchlistAsync(Product.Id, targetPrice);
+
+                var request = new WatchlistRequestDto
+                {
+                    ProductId = Product.Id,
+                    TargetPrice = targetPrice
+                };
+
+                bool success = await _apiService.AddToWatchlistAsync(request);
                 IsAddingToWatchlist = false;
 
                 if (success)

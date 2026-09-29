@@ -48,7 +48,7 @@
                        IsSpellCheckEnabled="True"
                        IsTextPredictionEnabled="True" />
 
-                <!-- Password Entry (Suggestions Disabled) -->
+                <!-- Password Entry -->
                 <Entry Placeholder="Password"
                        Text="{Binding Password}"
                        IsPassword="True"

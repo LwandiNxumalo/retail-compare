@@ -12,8 +12,6 @@ namespace RetailCompare.API.Controllers;
 [Route("api/[controller]")]
 public class WatchlistController(RetailCompareDbContext context) : ControllerBase
 {
-    private readonly RetailCompareDbContext _context = context;
-
     private int GetCurrentUserId()
     {
         var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -26,7 +24,7 @@ public class WatchlistController(RetailCompareDbContext context) : ControllerBas
         var userId = GetCurrentUserId();
         if (userId == 0) return Unauthorized();
 
-        var items = await _context.WatchlistItems
+        var items = await context.WatchlistItems
             .AsNoTracking()
             .Include(w => w.Product)
             .Where(w => w.UserId == userId)
@@ -53,16 +51,16 @@ public class WatchlistController(RetailCompareDbContext context) : ControllerBas
         var userId = GetCurrentUserId();
         if (userId == 0) return Unauthorized();
 
-        var product = await _context.Products.FindAsync(request.ProductId);
+        var product = await context.Products.FindAsync(request.ProductId);
         if (product == null) return NotFound("Product not found.");
 
-        var existingItem = await _context.WatchlistItems
+        var existingItem = await context.WatchlistItems
             .FirstOrDefaultAsync(w => w.UserId == userId && w.ProductId == request.ProductId);
 
         if (existingItem != null)
         {
             existingItem.TargetPrice = request.TargetPrice;
-            await _context.SaveChangesAsync();
+            await context.SaveChangesAsync();
 
             return Ok(new WatchlistItemDto
             {
@@ -85,8 +83,8 @@ public class WatchlistController(RetailCompareDbContext context) : ControllerBas
             AddedAt = DateTime.UtcNow
         };
 
-        _context.WatchlistItems.Add(watchlistItem);
-        await _context.SaveChangesAsync();
+        context.WatchlistItems.Add(watchlistItem);
+        await context.SaveChangesAsync();
 
         var resultDto = new WatchlistItemDto
         {
@@ -109,13 +107,13 @@ public class WatchlistController(RetailCompareDbContext context) : ControllerBas
         var userId = GetCurrentUserId();
         if (userId == 0) return Unauthorized();
 
-        var item = await _context.WatchlistItems
+        var item = await context.WatchlistItems
             .FirstOrDefaultAsync(w => w.Id == id && w.UserId == userId);
 
         if (item == null) return NotFound("Watchlist item not found.");
 
-        _context.WatchlistItems.Remove(item);
-        await _context.SaveChangesAsync();
+        context.WatchlistItems.Remove(item);
+        await context.SaveChangesAsync();
 
         return NoContent();
     }

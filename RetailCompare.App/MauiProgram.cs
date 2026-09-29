@@ -1,64 +1,56 @@
-<<<<<<< Updated upstream
-﻿using Microsoft.Extensions.Logging;
-=======
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using CommunityToolkit.Maui;
 using Microsoft.Extensions.Logging;
-using Microsoft.Maui.Hosting;
 using Microsoft.Maui.Controls.Hosting;
-using CommunityToolkit.Maui;
+using Microsoft.Maui.Hosting;
 using RetailCompare.App.Services;
 using RetailCompare.App.ViewModels;
 using RetailCompare.App.Views;
->>>>>>> Stashed changes
 
-namespace RetailCompare.App
+namespace RetailCompare.App;
+
+public static class MauiProgram
 {
-    public static class MauiProgram
+    public static MauiApp CreateMauiApp()
     {
-        public static MauiApp CreateMauiApp()
-        {
-            var builder = MauiApp.CreateBuilder();
-            builder
-                .UseMauiApp<App>()
-                .UseMauiCommunityToolkit()
-                .ConfigureFonts(fonts =>
-                {
-                    fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
-                    fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
-                });
-
-<<<<<<< Updated upstream
-=======
-            // Register HttpClient & ApiService
-            builder.Services.AddSingleton(sp => new HttpClient
+        var builder = MauiApp.CreateBuilder();
+        builder
+            .UseMauiApp<App>()
+            .UseMauiCommunityToolkit()
+            .ConfigureFonts(fonts =>
             {
-                BaseAddress = new Uri("https://localhost:7123/api/")
+                fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
+                fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
             });
-            builder.Services.AddSingleton<ApiService>();
 
-            // Register ViewModels
-            builder.Services.AddTransient<ProductListViewModel>();
-            builder.Services.AddTransient<WatchlistViewModel>();
-            builder.Services.AddTransient<ProductDetailViewModel>();
-            builder.Services.AddTransient<LoginViewModel>();
-            builder.Services.AddTransient<RegisterViewModel>();
+        // Register HttpClient & ApiService
+        builder.Services.AddSingleton(sp => new HttpClient
+        {
+            BaseAddress = new Uri("https://localhost:7123/api/")
+        });
+        builder.Services.AddSingleton<ApiService>();
 
-            // Register Views
-            builder.Services.AddTransient<MainPage>();
-            builder.Services.AddTransient<WatchlistPage>();
-            builder.Services.AddTransient<ProductDetailPage>();
-            builder.Services.AddTransient<LoginPage>();
-            builder.Services.AddTransient<RegisterPage>();
+        // Register ViewModels
+        builder.Services.AddTransient<ProductListViewModel>();
+        builder.Services.AddTransient<WatchlistViewModel>();
+        builder.Services.AddTransient<ProductDetailViewModel>();
+        builder.Services.AddTransient<LoginViewModel>();
+        builder.Services.AddTransient<RegisterViewModel>();
 
-            // Register Shell
-            builder.Services.AddSingleton<AppShell>();
+        // Register Views
+        builder.Services.AddTransient<MainPage>();
+        builder.Services.AddTransient<WatchlistPage>();
+        builder.Services.AddTransient<ProductDetailPage>();
+        builder.Services.AddTransient<LoginPage>();
+        builder.Services.AddTransient<RegisterPage>();
 
->>>>>>> Stashed changes
+        // Register App Shell & Application
+        builder.Services.AddSingleton<AppShell>();
+        builder.Services.AddSingleton<App>();
+
 #if DEBUG
-    		builder.Logging.AddDebug();
+        builder.Logging.AddDebug();
 #endif
 
-            return builder.Build();
-        }
+        return builder.Build();
     }
 }
