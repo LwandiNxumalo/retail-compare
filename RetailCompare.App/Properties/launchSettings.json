@@ -1,8 +1,14 @@
 {
   "profiles": {
     "Windows Machine": {
+<<<<<<< Updated upstream
       "commandName": "Project",
       "nativeDebugging": false
+=======
+      "commandName": "MsixPackage",
+      "nativeDebugging": false,
+      "applicationUrl": "http://localhost:44362"
+>>>>>>> Stashed changes
     }
   }
 }

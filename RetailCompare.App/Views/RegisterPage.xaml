@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+             xmlns:vm="clr-namespace:RetailCompare.App.ViewModels"
+             x:Class="RetailCompare.App.Views.RegisterPage"
+             x:DataType="vm:RegisterViewModel"
+             Title="Create Account">
+
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <toolkit:IsNotNullConverter x:Key="IsNotNullConverter" />
+        </ResourceDictionary>
+    </ContentPage.Resources>
+
+    <ScrollView>
+        <Grid VerticalOptions="Center" Padding="24">
+            <VerticalStackLayout Spacing="16" MaximumWidthRequest="400">
+
+                <Label Text="Create Account"
+                       FontSize="28"
+                       FontAttributes="Bold"
+                       TextColor="#2563EB"
+                       HorizontalOptions="Center" />
+
+                <!-- Dynamic Error Message Banner -->
+                <Border BackgroundColor="#FEE2E2"
+                        Stroke="#FCA5A5"
+                        Padding="12"
+                        StrokeShape="RoundRectangle 6"
+                        IsEnabled="{Binding ErrorMessage, Converter={StaticResource IsNotNullConverter}}"
+                        IsVisible="{Binding ErrorMessage, Converter={StaticResource IsNotNullConverter}}">
+                    <Label Text="{Binding ErrorMessage}"
+                           TextColor="#DC2626"
+                           FontSize="13" />
+                </Border>
+
+                <!-- Username Entry -->
+                <Entry Placeholder="Username"
+                       Text="{Binding Username}"
+                       IsSpellCheckEnabled="True"
+                       IsTextPredictionEnabled="True" />
+
+                <!-- Email Entry -->
+                <Entry Placeholder="Email Address"
+                       Text="{Binding Email}"
+                       Keyboard="Email"
+                       IsSpellCheckEnabled="True"
+                       IsTextPredictionEnabled="True" />
+
+                <!-- Password Entry (Suggestions Disabled) -->
+                <Entry Placeholder="Password"
+                       Text="{Binding Password}"
+                       IsPassword="True"
+                       IsSpellCheckEnabled="False"
+                       IsTextPredictionEnabled="False" />
+
+                <!-- Password Rules / Hints -->
+                <VerticalStackLayout Spacing="4" Margin="4,0,0,0">
+                    <Label Text="Password must contain:" FontSize="12" TextColor="#64748B" FontAttributes="Bold" />
+                    <Label Text="• At least 8 characters" FontSize="12" TextColor="#64748B" />
+                    <Label Text="• At least one uppercase letter (A-Z)" FontSize="12" TextColor="#64748B" />
+                    <Label Text="• At least one number (0-9)" FontSize="12" TextColor="#64748B" />
+                    <Label Text="• At least one special character (@, #, $, etc.)" FontSize="12" TextColor="#64748B" />
+                </VerticalStackLayout>
+
+                <!-- Save Credentials CheckBox -->
+                <HorizontalStackLayout Spacing="8" VerticalOptions="Center">
+                    <CheckBox IsChecked="{Binding SaveCredentials}" />
+                    <Label Text="Save credentials on this device" VerticalOptions="Center" TextColor="#64748B" FontSize="13" />
+                </HorizontalStackLayout>
+
+                <!-- Sign Up Button -->
+                <Button Text="Sign Up"
+                        Command="{Binding RegisterCommand}"
+                        BackgroundColor="#2563EB"
+                        TextColor="White"
+                        FontAttributes="Bold"
+                        CornerRadius="8"
+                        HeightRequest="48"
+                        Margin="0,8,0,0" />
+
+                <ActivityIndicator IsRunning="{Binding IsBusy}"
+                                   IsVisible="{Binding IsBusy}"
+                                   Color="#2563EB"
+                                   HorizontalOptions="Center" />
+
+            </VerticalStackLayout>
+        </Grid>
+    </ScrollView>
+
+</ContentPage>
