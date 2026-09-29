@@ -1,6 +1,6 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using System.Text.RegularExpressions;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using IntelliJ.Lang.Annotations;
 using RetailCompare.App.Services;
 using RetailCompare.Shared.models;
 
@@ -11,42 +11,51 @@ namespace RetailCompare.App.ViewModels
         private readonly ApiService _apiService;
 
         [ObservableProperty]
-        private string _fullName = string.Empty;
+        public partial string Username { get; set; }
 
         [ObservableProperty]
-        private string _email = string.Empty;
+        public partial string Email { get; set; }
 
         [ObservableProperty]
-        private string _password = string.Empty;
+        public partial string Password { get; set; }
 
         [ObservableProperty]
-        private string _confirmPassword = string.Empty;
+        public partial bool SaveCredentials { get; set; }
 
         [ObservableProperty]
-        private bool _isBusy;
+        [NotifyCanExecuteChangedFor(nameof(RegisterCommand))]
+        public partial bool IsBusy { get; set; }
 
         [ObservableProperty]
-        private string _errorMessage = string.Empty;
+        public partial string ErrorMessage { get; set; }
 
         public RegisterViewModel(ApiService apiService)
         {
             _apiService = apiService;
+
+            // Initialize property defaults in constructor
+            Username = string.Empty;
+            Email = string.Empty;
+            Password = string.Empty;
+            SaveCredentials = true;
+            IsBusy = false;
+            ErrorMessage = string.Empty;
         }
 
-        [RelayCommand]
+        private bool CanRegister() => !IsBusy;
+
+        [RelayCommand(CanExecute = nameof(CanRegister))]
         public async Task RegisterAsync()
         {
-            if (IsBusy) return;
-
-            if (string.IsNullOrWhiteSpace(FullName) || string.IsNullOrWhiteSpace(Email) || string.IsNullOrWhiteSpace(Password))
+            if (string.IsNullOrWhiteSpace(Username) || string.IsNullOrWhiteSpace(Email) || string.IsNullOrWhiteSpace(Password))
             {
-                ErrorMessage = "Please complete all fields.";
+                ErrorMessage = "Please fill in all required fields.";
                 return;
             }
 
-            if (Password != ConfirmPassword)
+            if (!IsPasswordStrong(Password))
             {
-                ErrorMessage = "Passwords do not match.";
+                ErrorMessage = "Password must be at least 8 characters long and contain an uppercase letter, a number, and a special character.";
                 return;
             }
 
@@ -55,28 +64,35 @@ namespace RetailCompare.App.ViewModels
                 IsBusy = true;
                 ErrorMessage = string.Empty;
 
-                var request = new UserRegisterDto
+                var registerDto = new UserRegisterDto
                 {
-                    FullName = FullName.Trim(),
+                    FullName = Username.Trim(),
                     Email = Email.Trim(),
                     Password = Password
                 };
 
-                var result = await _apiService.RegisterAsync(request);
+                // Check for non-null AuthResponseDto returned from RegisterAsync
+                var response = await _apiService.RegisterAsync(registerDto);
 
-                if (result != null && !string.IsNullOrEmpty(result.Token))
+                if (response != null)
                 {
-                    await Shell.Current.DisplayAlertAsync("Success", "Account created successfully!", "OK");
-                    await Shell.Current.GoToAsync("//MainPage");
+                    if (SaveCredentials)
+                    {
+                        Preferences.Set("SavedEmail", Email.Trim());
+                    }
+
+                    // Use async DisplayAlertAsync for .NET 10 MAUI
+                    await Shell.Current.DisplayAlertAsync("Success", "Account created successfully! Please sign in.", "OK");
+                    await Shell.Current.GoToAsync("//LoginPage");
                 }
                 else
                 {
-                    ErrorMessage = "Registration failed. An account with this email may already exist.";
+                    ErrorMessage = "Registration failed. This email might already be registered.";
                 }
             }
             catch (Exception ex)
             {
-                ErrorMessage = "Registration failed. Please check your connection.";
+                ErrorMessage = "An error occurred during registration. Please check your network connection.";
                 System.Diagnostics.Debug.WriteLine($"[RegisterViewModel Error] {ex.Message}");
             }
             finally
@@ -85,10 +101,13 @@ namespace RetailCompare.App.ViewModels
             }
         }
 
-        [RelayCommand]
-        public async Task GoToLoginAsync()
+        private bool IsPasswordStrong(string password)
         {
-            await Shell.Current.GoToAsync("..");
+            if (password.Length < 8) return false;
+            if (!Regex.IsMatch(password, @"[A-Z]")) return false;
+            if (!Regex.IsMatch(password, @"[0-9]")) return false;
+            if (!Regex.IsMatch(password, @"[\W_]")) return false;
+            return true;
         }
     }
 }

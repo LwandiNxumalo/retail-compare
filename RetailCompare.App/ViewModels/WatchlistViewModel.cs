@@ -9,18 +9,19 @@ namespace RetailCompare.App.ViewModels;
 public partial class WatchlistViewModel : ObservableObject
 {
     private readonly ApiService _apiService;
+    [ObservableProperty]
+    public partial bool IsLoading { get; set; }
 
     [ObservableProperty]
-    private bool _isLoading;
-
-    [ObservableProperty]
-    private bool _isEmpty;
+    public partial bool IsEmpty { get; set; }
 
     public ObservableCollection<WatchlistItemDto> WatchlistItems { get; } = new();
 
     public WatchlistViewModel(ApiService apiService)
     {
         _apiService = apiService;
+        IsLoading = false;
+        IsEmpty = false;
     }
 
     [RelayCommand]

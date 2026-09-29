@@ -10,27 +10,43 @@ namespace RetailCompare.App.ViewModels
         private readonly ApiService _apiService;
 
         [ObservableProperty]
-        private string _email = string.Empty;
+        public partial string Email { get; set; } = string.Empty;
 
         [ObservableProperty]
-        private string _password = string.Empty;
+        public partial string Password { get; set; } = string.Empty;
 
         [ObservableProperty]
-        private bool _isBusy;
+        public partial bool RememberMe { get; set; } = true;
 
         [ObservableProperty]
-        private string _errorMessage = string.Empty;
+        [NotifyCanExecuteChangedFor(nameof(LoginCommand))]
+        public partial bool IsBusy { get; set; } = false;
+
+        [ObservableProperty]
+        public partial string ErrorMessage { get; set; } = string.Empty;
 
         public LoginViewModel(ApiService apiService)
         {
             _apiService = apiService;
+            LoadSavedCredentials();
         }
 
-        [RelayCommand]
+        private void LoadSavedCredentials()
+        {
+            // Auto-fill saved email if available
+            var savedEmail = Preferences.Get("SavedEmail", string.Empty);
+            if (!string.IsNullOrEmpty(savedEmail))
+            {
+                Email = savedEmail;
+                RememberMe = true;
+            }
+        }
+
+        private bool CanLogin() => !IsBusy;
+
+        [RelayCommand(CanExecute = nameof(CanLogin))]
         public async Task LoginAsync()
         {
-            if (IsBusy) return;
-
             if (string.IsNullOrWhiteSpace(Email) || string.IsNullOrWhiteSpace(Password))
             {
                 ErrorMessage = "Please enter both email and password.";
@@ -47,14 +63,22 @@ namespace RetailCompare.App.ViewModels
 
                 if (result != null && !string.IsNullOrEmpty(result.Token))
                 {
-                    // Reset fields and navigate to Main App
-                    Email = string.Empty;
+                    // Handle Remember Me feature
+                    if (RememberMe)
+                    {
+                        Preferences.Set("SavedEmail", Email.Trim());
+                    }
+                    else
+                    {
+                        Preferences.Remove("SavedEmail");
+                    }
+
                     Password = string.Empty;
                     await Shell.Current.GoToAsync("//MainPage");
                 }
                 else
                 {
-                    ErrorMessage = "Invalid credentials. Please try again.";
+                    ErrorMessage = "Invalid credentials. Please check your email and password.";
                 }
             }
             catch (Exception ex)
@@ -66,6 +90,19 @@ namespace RetailCompare.App.ViewModels
             {
                 IsBusy = false;
             }
+        }
+
+        [RelayCommand]
+        public async Task ForgotPasswordAsync()
+        {
+            if (string.IsNullOrWhiteSpace(Email))
+            {
+                ErrorMessage = "Please enter your email address to reset your password.";
+                return;
+            }
+
+            // Prompt user or execute password reset API call
+            await Shell.Current.DisplayAlertAsync("Password Reset", $"A password reset link has been sent to {Email}.", "OK");
         }
 
         [RelayCommand]

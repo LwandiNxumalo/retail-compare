@@ -11,20 +11,22 @@ namespace RetailCompare.App.ViewModels
         private readonly ApiService _apiService;
 
         [ObservableProperty]
-        private int _productId;
+        public partial int ProductId { get; set; }
 
         [ObservableProperty]
-        private ProductDto? _product;
+        public partial ProductDto? Product { get; set; }
 
         [ObservableProperty]
-        private bool _isLoading;
+        public partial bool IsLoading { get; set; }
 
         [ObservableProperty]
-        private bool _isAddingToWatchlist;
+        public partial bool IsAddingToWatchlist { get; set; }
 
         public ProductDetailViewModel(ApiService apiService)
         {
             _apiService = apiService;
+            IsLoading = false;
+            IsAddingToWatchlist = false;
         }
 
         partial void OnProductIdChanged(int value)

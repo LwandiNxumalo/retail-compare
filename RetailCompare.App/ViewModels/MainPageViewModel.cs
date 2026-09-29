@@ -12,20 +12,24 @@ namespace RetailCompare.App.ViewModels
         private readonly ApiService _apiService;
 
         [ObservableProperty]
-        private ObservableCollection<ProductDto> _products = new();
+        public partial ObservableCollection<ProductDto> Products { get; set; }
 
         [ObservableProperty]
-        private string _searchText = string.Empty;
+        public partial string SearchText { get; set; }
 
         [ObservableProperty]
-        private bool _isLoading;
+        public partial bool IsLoading { get; set; }
 
         [ObservableProperty]
-        private bool _isEmpty;
+        public partial bool IsEmpty { get; set; }
 
         public MainPageViewModel(ApiService apiService)
         {
             _apiService = apiService;
+            Products = new ObservableCollection<ProductDto>();
+            SearchText = string.Empty;
+            IsLoading = false;
+            IsEmpty = false;
         }
 
         partial void OnSearchTextChanged(string value)
