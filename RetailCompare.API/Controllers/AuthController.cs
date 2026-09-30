@@ -67,4 +67,6 @@ public class AuthController(RetailCompareDbContext context, ITokenService tokenS
             FullName = user.FullName
         });
     }
+
+
 }

@@ -23,25 +23,32 @@ public class ApiService
     {
         try
         {
-            var response = await _httpClient.PostAsJsonAsync("auth/login", loginDto);
+            // Normalize email before sending
+            loginDto.Email = loginDto.Email.Trim().ToLower();
+
+            var response = await _httpClient.PostAsJsonAsync("api/auth/login", loginDto);
 
             if (response.IsSuccessStatusCode)
             {
                 var result = await response.Content.ReadFromJsonAsync<AuthResponseDto>();
                 if (result != null && !string.IsNullOrEmpty(result.Token))
                 {
-                    await SecureStorage.Default.SetAsync(AuthTokenKey, result.Token);
-                    await SetAuthHeaderAsync();
+                    await SecureStorage.SetAsync("auth_token", result.Token);
                     return true;
                 }
             }
+
+            // Print API error status to debug window
+            var errorContent = await response.Content.ReadAsStringAsync();
+            System.Diagnostics.Debug.WriteLine($"[ApiService Login Failed] Status: {response.StatusCode}, Reason: {errorContent}");
+
+            return false;
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"[LoginAsync Error] {ex.Message}");
+            System.Diagnostics.Debug.WriteLine($"[ApiService Login Exception] {ex.Message}");
+            return false;
         }
-
-        return false;
     }
 
     /// <summary>
@@ -51,12 +58,22 @@ public class ApiService
     {
         try
         {
-            var response = await _httpClient.PostAsJsonAsync("auth/register", registerDto);
-            return response.IsSuccessStatusCode;
+            var response = await _httpClient.PostAsJsonAsync("api/auth/register", registerDto);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var result = await response.Content.ReadFromJsonAsync<AuthResponseDto>();
+                if (result != null && !string.IsNullOrEmpty(result.Token))
+                {
+                    await SecureStorage.SetAsync("auth_token", result.Token);
+                    return true;
+                }
+            }
+            return false;
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"[RegisterAsync Error] {ex.Message}");
+            System.Diagnostics.Debug.WriteLine($"[ApiService Register Error] {ex.Message}");
             return false;
         }
     }
