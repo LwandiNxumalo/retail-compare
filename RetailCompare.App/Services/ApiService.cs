@@ -23,9 +23,9 @@ public class ApiService
     {
         try
         {
-            // Normalize email before sending
             loginDto.Email = loginDto.Email.Trim().ToLower();
 
+            // Hits https://localhost:5189/api/auth/login correctly
             var response = await _httpClient.PostAsJsonAsync("api/auth/login", loginDto);
 
             if (response.IsSuccessStatusCode)
@@ -38,15 +38,13 @@ public class ApiService
                 }
             }
 
-            // Print API error status to debug window
-            var errorContent = await response.Content.ReadAsStringAsync();
-            System.Diagnostics.Debug.WriteLine($"[ApiService Login Failed] Status: {response.StatusCode}, Reason: {errorContent}");
-
+            var error = await response.Content.ReadAsStringAsync();
+            System.Diagnostics.Debug.WriteLine($"[Login Failed] Status: {response.StatusCode}, Details: {error}");
             return false;
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"[ApiService Login Exception] {ex.Message}");
+            System.Diagnostics.Debug.WriteLine($"[Login Exception] {ex.Message}");
             return false;
         }
     }

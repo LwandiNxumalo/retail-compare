@@ -22,11 +22,27 @@ public static class MauiProgram
                 fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
             });
 
-        // Register HttpClient & ApiService
-        builder.Services.AddSingleton(sp => new HttpClient
+        // Determine the correct host depending on platform
+#if ANDROID
+        string baseUrl = "https://10.0.2.2:5189/";
+#else
+        string baseUrl = "https://localhost:5189/";
+#endif
+
+        // Register HttpClient with SSL bypass for DEBUG mode
+        builder.Services.AddSingleton(sp =>
         {
-            BaseAddress = new Uri("https://localhost:7123/api/")
+#if DEBUG
+            var handler = GetInsecureHandler();
+            var client = new HttpClient(handler);
+#else
+            var client = new HttpClient();
+#endif
+            client.BaseAddress = new Uri(baseUrl);
+            return client;
         });
+
+        // Register ApiService
         builder.Services.AddSingleton<ApiService>();
 
         // Register ViewModels
@@ -52,5 +68,12 @@ public static class MauiProgram
 #endif
 
         return builder.Build();
+    }
+
+    public static HttpClientHandler GetInsecureHandler()
+    {
+        var handler = new HttpClientHandler();
+        handler.ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => true;
+        return handler;
     }
 }
